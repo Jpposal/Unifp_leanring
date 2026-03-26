@@ -1,136 +1,81 @@
-# UniFP - Unified Force and Position Control
+# UniFP Learning
 
-
-<div align="center">
-Conference on Robot Learning (CoRL) 2025 Best paper
-
-[[Website]](https://unified-force.github.io/)
-[[Arxiv]](https://arxiv.org/pdf/2505.20829)
-[[Oral Talk]](https://youtu.be/9lzFVQoc4Do?t=2652)
-
-<p align="center">
-    <img src="docs/teaser.jpg" height=400px"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-</p>
-
-[![IsaacGym](https://img.shields.io/badge/IsaacGym-Preview4-b.svg)](https://developer.nvidia.com/isaac-gym)
-[![Python](https://img.shields.io/badge/python-3.8-blue.svg)](https://docs.python.org/3/whatsnew/3.8.html)
-[![Linux platform](https://img.shields.io/badge/platform-linux--64-orange.svg)](https://releases.ubuntu.com/20.04/)
-
-</div>
+Personal research and development repository for B2Z1 control, force estimation, and policy adaptation experiments.
 
 ## Overview
 
-This project implements a reinforcement learning-based whole body control framework for B2Z1 robots, supporting unified policy learning for both position and force control. The framework uses Isaac Gym for simulation training and supports deployment from simulation to real robots.
+This repository is used for development and experiments around B2Z1 whole-body control in simulation. Current work focuses on force-position control, trajectory tracking, and estimator-policy decoupling for later controller replacement.
 
-**Key Features**:
-- Support for B2Z1 robot whole body control
-- Unified policy learning for position and force control
-- Reinforcement learning training based on PPO algorithm
-- Support for multiple robot configurations (B2Z1, G1, etc.)
-- Complete simulation-to-real deployment pipeline
+The main goal is to separate the estimation module from the reinforcement learning policy, so that the estimator can be reused by other downstream controllers or tasks.
 
-## TODO
-- [x] Release UniFP training pipeline
-- [ ] Release sim2real with ROS2
-- [ ] Release sim2sim in MuJoCo
-- [ ] Release imitation learing data collection pipeline
+## Current Focus
 
-## Installation
+- B2Z1 position-force control in Isaac Gym
+- External force related observation and estimation
+- Decoupling estimator and actor
+- Trajectory tracking experiments
+- Interface preparation for future controller replacement
 
-### System Requirements
-- Ubuntu 20.04/22.04
+## Environment
+
+Recommended environment:
+
+- Ubuntu 20.04 or 22.04
 - Python 3.8
-- CUDA 11.2+
-- Isaac Gym Preview 4 (requires NVIDIA developer account)
+- CUDA-compatible GPU
+- Isaac Gym Preview 4
 
-### Installation Steps
+Example setup:
 
-1. **Clone this project**
-   ```bash
-   git clone https://github.com/deathpoker/UniFP.git
-   cd UniFP
-   ```
+```bash
+conda create -n unifp python=3.8
+conda activate unifp
+pip install numpy matplotlib wandb
+```
 
-2. **Set up the environment**
-   ```bash
-   conda create -n unifp python=3.8 
-   # isaacgym requires python <=3.8
-   conda activate unifp
-   # Download the Isaac Gym binaries from https://developer.nvidia.com/isaac-gym 
-   wget https://developer.nvidia.com/isaac-gym-preview-4
-   tar -xvzf isaac-gym-preview-4
-   
-   cd isaacgym/python && pip install -e .
-   ```
-    For libpython error:
-    - Set LD_LIBRARY_PATH:
-        ```bash
-        export LD_LIBRARY_PATH=</path/to/conda/envs/your_env/lib>:$LD_LIBRARY_PATH
-        ```
+Isaac Gym should be installed separately under the local workspace or environment.
 
-3. **Install Python dependencies**
-   ```bash
-   # Install PyTorch
-   conda install pytorch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 pytorch-cuda=12.1 -c pytorch -c nvidia
-   
-   # Install other dependencies
-   pip install numpy matplotlib wandb
-   ```
+## Repository Structure
 
+- `legged_gym/envs/b2/`
+	- B2Z1 task configuration and environment implementation
+- `legged_gym/b2_gym_learn/ppo_cse_pf/`
+	- PPO training code, actor-critic structure, and adaptation modules
+- `legged_gym/scripts/`
+	- Training, evaluation, and experiment scripts
+- `resources/robots/b2z1/`
+	- Robot description files and related assets
 
-## Usage
+## Common Workflows
 
-### Policy Training
+### Training
 
-#### B2Z1 Position-Force Control Training
 ```bash
 cd legged_gym/scripts
 python train_b2z1posforce.py --task=b2z1_pos_force --headless
 ```
 
-### Policy Evaluation and Testing
+### Evaluation
 
-#### Run Trained Policies
 ```bash
-# B2Z1 position-force control testing
+cd legged_gym/scripts
 python play_b2z1posforce.py --task=b2z1_pos_force --load_run=<run_name>
 ```
 
-### Parameter Configuration
+## Current Research Notes
 
-#### Training Parameters
-- `--task`: Task name (b2z1_pos_force, b2z1_force_realrobot, h1, g1_humanoidgym, etc.)
-- `--headless`: Run in headless mode
-- `--num_envs`: Number of parallel environments
-- `--max_iterations`: Maximum training iterations
+The current development direction includes:
 
-#### Environment Parameters
-- `--flat_terrain`: Use flat terrain
-- `--physics_engine`: Physics engine (physx)
-- `--sim_device`: Simulation device (cuda:0)
+- checking which observation terms are actually informative for external force estimation
+- restructuring the adaptation / estimator module into a reusable component
+- reducing coupling between latent estimation and policy optimization
+- preparing for future replacement of the reinforcement learning actor with other control modules
 
+## Notes
 
-### Core Components
+This repository is intended for personal and internal research use. Some scripts, logs, and local experiment artifacts may change frequently during development.
 
-- **Environment Configuration** (`legged_gym/envs/b2/b2z1_pos_force_config.py`)
-  - Robot initial state configuration
-  - Reward function parameters
-  - Observation space definition
-  - Action space definition
+## Upstream
 
-- **Environment Implementation** (`legged_gym/envs/b2/legged_robot_b2z1_pos_force.py`)
-  - Simulation environment logic
-  - Reward calculation
-  - Observation space construction
-  - Action execution
-
-- **Training Algorithm** (`legged_gym/b2_gym_learn/ppo_cse_pf/`)
-  - PPO algorithm implementation
-  - Policy network structure
-  - Value network structure
-
-- **Task Registration** (`legged_gym/utils/task_registry_b2z1posforce.py`)
-  - Task registration management
-  - Environment creation
-  - Trainer creation
+This repository is based on an upstream UniFP codebase and has been modified for local research and development.
 
