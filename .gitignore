@@ -10,3 +10,6 @@ ckpt
 isaac-gym-preview-4
 isaacgym
 *.egg-info
+# local logs and data
+legged_gym/scripts/training_log_wandb.txt
+legged_gym/scripts/*.npy

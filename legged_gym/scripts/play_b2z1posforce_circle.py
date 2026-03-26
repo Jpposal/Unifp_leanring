@@ -10,11 +10,14 @@ from legged_gym.utils import  get_args, export_policy_as_jit, task_registry, Log
 
 import numpy as np
 import torch
+from isaacgym.torch_utils import quat_apply, quat_rotate_inverse
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import time
+import atexit
+
 
 
 def play(args):
@@ -39,6 +42,10 @@ def play(args):
     
     # prepare environment
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
+
+    # 开启遥控模式，禁止环境内部自动更新commands，使外部注入的画圆命令生效
+    env.cfg.env.teleop_mode = True
+
     obs = env.get_observations()
     # load policy
     train_cfg.runner.resume = True
@@ -130,10 +137,143 @@ def play(args):
 
     env.play = True
     policy_info = {}
+    DRAW_CIRCLE = True 
+    
+    # 数据记录容器
+    log_data = []
+
+    # [New] Capture nominal base height for Body-Relative correction
+    nominal_base_height = None
+
+    def save_log_data():
+        if len(log_data) > 0:
+            print("\nSaving tracking data on exit...")
+            np_log_data = np.array(log_data)
+            np.save("circle_tracking_data.npy", np_log_data)
+            print(f"Data saved to circle_tracking_data.npy with shape {np_log_data.shape}")
+    
+    atexit.register(save_log_data)
+
     for i in range(100*int(env.max_episode_length)):
         actions = policy(obs, policy_info)
+        
+        # --- 新增画圆逻辑 ---
+        if DRAW_CIRCLE:
+            # 1. 机器人基座静止
+            env.commands[:, 0] = 0.
+            env.commands[:, 1] = 0.
+            env.commands[:, 2] = 0.
+            
+            # 2. 定义圆周运动参数 (局部球坐标)
+            target_radius = 0.65       
+            target_pitch = 0.0         
+            target_yaw = np.sin(i * 0.02) * 0.8
+            
+            # 3. 注入命令 
+            env.commands[:, 3] = target_radius
+            env.commands[:, 4] = target_pitch
+            env.commands[:, 5] = target_yaw
+
+            # [新增] 同步更新环境内部的目标变量
+            env.curr_ee_goal_sphere[:, 0] = target_radius
+            env.curr_ee_goal_sphere[:, 1] = target_pitch
+            env.curr_ee_goal_sphere[:, 2] = target_yaw
+            
+            # 4. 力控指令清零
+            env.commands[:, 9:12] = 0.0
+
+            # --- 数据记录 (Data Logging for Local Frame Tracking) ---
+            if nominal_base_height is None:
+                nominal_base_height = env.root_states[0, 2].item()
+                print(f"Captured Nominal Base Height: {nominal_base_height:.4f} m")
+
+            # 目标位置 (已经在 Local Spherical 转换为 Local Cartesian 了)
+            # 注意: 这里的 Local Frame 是相对于 "Sphere Center" 的，
+            # 在 envs code 里: center = base_pos_xy_ground + rotated_offset
+            # 我们简化计算，直接记录 
+            # 1. 目标指令转换出的 Local Cartesian 指令 (相对于 Sphere Center)
+            # 2. 实际末端位置转换回 Local Cartesian (相对于 Sphere Center)
+            
+            # Target (Local Cartesian derived from commands)
+            t_x = target_radius * np.cos(target_pitch) * np.cos(target_yaw)
+            t_y = target_radius * np.cos(target_pitch) * np.sin(target_yaw)
+            t_z = target_radius * np.sin(target_pitch)
+            
+            # Actual (Convert World Position back to Local Cartesian relative to Sphere Center)
+            # 参考 env._resample_ee_goal 中的逻辑
+            # center calculation:
+            # center = [base_x, base_y, 0] + quat_apply(base_yaw_quat, offset)
+            # 我们需要获取 base_yaw_quat
+            
+            # env.root_states: [pos(3), quat(4), lin_vel(3), ang_vel(3)]
+            base_quat = env.root_states[:, 3:7]
+            
+            # 提取 yaw rotation (project gravity vector logic equivalent or just extraction)
+            # 简单起见，我们直接复用 env 中的 self.base_yaw_quat 如果它在 play loop 中更新了
+            # env.post_physics_step() -> check_termination -> compute_observations
+            # 在 compute_observations 之前通常会更新 base_quat 等
+            # 但 env.base_yaw_quat 是在 compute_observations 里计算的吗？
+            # 让我们手动计算一下以防万一
+            from isaacgym.torch_utils import get_euler_xyz, quat_from_euler_xyz
+            r, p, y = get_euler_xyz(base_quat)
+            # base_yaw_quat just has the yaw rotation
+            base_yaw_quat = quat_from_euler_xyz(torch.zeros_like(r), torch.zeros_like(p), y)
+            
+            # Recompute Sphere Center (Reference Point)
+            # offset 应该是 env.ee_goal_center_offset
+            # center = [base_x, base_y, 0] 
+            # 注意: env code 里 center Z 是 0 (floor projection) + z_invariant_offset
+            root_xy_ground = env.root_states[:, :3].clone()
+            root_xy_ground[:, 2] = 0.0
+            
+            # [Fix] Need to ensure we use the same offset logic as during training
+            # In update_ee_goal: 
+            # self.ee_goal_center_offset = torch.tensor([x, y, z])
+            # center = root_states + rotated_offset
+            
+            # Use env.ee_goal_center_offset if available, else fallback
+            if hasattr(env, 'ee_goal_center_offset'):
+                offset = env.ee_goal_center_offset.clone()
+            else:
+                # Fallbck: Assume mostly forward shoulder. 
+                # Ideally you should check cfg, but let's try reading from env if possible or default to prev logic
+                # For now let's hope env has it initialized
+                 offset = torch.zeros((env.num_envs, 3), device=env.device)
+            
+            # [Correction] Apply Base Height Drift Compensation
+            current_base_z = env.root_states[:, 2]
+            z_drift = current_base_z - nominal_base_height
+            
+            sphere_center_ground = root_xy_ground + quat_apply(base_yaw_quat, offset)
+            
+            # Create a "Body-Attached" Sphere Center
+            sphere_center_body = sphere_center_ground.clone()
+            sphere_center_body[:, 2] += z_drift
+            
+            # Actual EE Position in World Frame
+            ee_pos_world = env.ee_pos  # [num_envs, 3]
+            
+            # Compute actual position relative to BODY CORRECTED sphere center
+            rel_pos_world = ee_pos_world - sphere_center_body
+            
+            # Rotate back to align with Local Frame (Heading)
+            # valid_ee_local_cart = quat_rotate_inverse(base_yaw_quat, rel_pos_world)
+            actual_local_pos = quat_rotate_inverse(base_yaw_quat, rel_pos_world)
+            
+            # Now we have Target Local and Actual Local
+            # Target is: [t_x, t_y, t_z]
+            # Actual is: actual_local_pos[0] (vector of 3)
+            
+            target_vec_local_np = np.array([t_x, t_y, t_z])
+            actual_vec_local_np = actual_local_pos[0].detach().cpu().numpy()
+            
+            frame_data = np.concatenate([target_vec_local_np, actual_vec_local_np])
+            log_data.append(frame_data)
+            # -------------------------------
+        # -------------------
+
         # breakpoint()
-        if FIX_COMMAND:
+        if FIX_COMMAND and not DRAW_CIRCLE:
             env.commands[:, 0] = 0.    # 1.0
             env.commands[:, 1] = 0.
             env.commands[:, 2] = 0.0
@@ -183,8 +323,11 @@ def play(args):
             # line1_eepos.set_3d_properties([0, vector1_eepos[2]])
             # line2_eepos.set_data([0, vector2_eepos[0]], [0, vector2_eepos[1]])
             # line2_eepos.set_3d_properties([0, vector2_eepos[2]])
-            # plt.draw()
-            # plt.pause(0.001)
+            plt.draw()
+            plt.pause(0.001)
+    
+    # 循环结束，atexit 会自动保存数据
+    pass
 
 if __name__ == '__main__':
     EXPORT_POLICY = True
@@ -195,4 +338,9 @@ if __name__ == '__main__':
     args = get_args()
     if args.task == "go2":
         args.task = "b2z1_pos_force"
-    play(args)
+    
+    try:
+        play(args)
+    except KeyboardInterrupt:
+        print("Simulation stopped.")
+

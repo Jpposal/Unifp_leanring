@@ -239,7 +239,7 @@ class B2Z1PosForceRoughCfg( LeggedRobotCfg ):
         grasp_offset = 0.08
 
     class asset( LeggedRobotCfg.asset ):
-        file = 'resources/robots/b2z1/b2z1.urdf'
+        file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/b2z1/b2z1.urdf'
         name = "b2z1"
         foot_name = "foot"
         thigh_name = "thigh"
@@ -279,7 +279,7 @@ class B2Z1PosForceRoughCfg( LeggedRobotCfg ):
             stand_still = 0.5 
             ref_dof_leg = 1.0
             alive = 1.5
-            lin_vel_z = -1.5 
+            lin_vel_z = -4.0 
             feet_air_time = 1.0 
             feet_height = 1.0 
             ang_vel_xy = -0.02 
@@ -295,7 +295,7 @@ class B2Z1PosForceRoughCfg( LeggedRobotCfg ):
             hip_pos = -0.5  
             feet_drag = -0.0008 
             feet_contact_forces = -0.001 
-            base_height = -2.0
+            base_height = -10.0
             feet_pos_xy = -0.5
             feet_height_high = -15
             

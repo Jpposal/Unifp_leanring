@@ -446,8 +446,10 @@ class LeggedRobot_b2z1_pos_force(BaseTask):
         self.up_axis_idx = 2 # 2 for z, 1 for y -> adapt gravity accordingly
         self.sim = self.gym.create_sim(self.sim_device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
         self.terrain = Terrain(self.cfg.terrain, )
-        self._create_trimesh()
-        # self._create_ground_plane()
+        if self.cfg.terrain.mesh_type == 'plane':
+            self._create_ground_plane()
+        elif self.cfg.terrain.mesh_type == 'trimesh':
+            self._create_trimesh()
         self._create_envs()
 
     def set_camera(self, position, lookat):
@@ -1727,6 +1729,19 @@ class LeggedRobot_b2z1_pos_force(BaseTask):
         """ Sets environment origins. On rough terrain the origins are defined by the terrain platforms.
             Otherwise create a grid.
         """
+        if self.cfg.terrain.mesh_type == 'plane':
+            self.custom_origins = False
+            self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
+            # create a grid of robots
+            num_cols = np.floor(np.sqrt(self.num_envs))
+            num_rows = np.ceil(self.num_envs / num_cols)
+            xx, yy = torch.meshgrid(torch.arange(num_rows), torch.arange(num_cols))
+            spacing = self.cfg.env.env_spacing
+            self.env_origins[:, 0] = spacing * xx.flatten()[:self.num_envs]
+            self.env_origins[:, 1] = spacing * yy.flatten()[:self.num_envs]
+            self.env_origins[:, 2] = 0.
+            return
+
         self.custom_origins = True
         self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
         # put robots at the origins defined by the terrain

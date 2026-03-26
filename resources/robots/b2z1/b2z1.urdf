@@ -26,7 +26,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/base_link.dae" />
+          filename="meshes/base_link.dae" />
       </geometry>
       <material
         name="">
@@ -66,7 +66,7 @@
       <geometry>
         <cylinder length="0.16" radius="0.076" />
         <!-- <mesh
-          filename="./meshes/lidar_link.STL" /> -->
+          filename="meshes/lidar_link.STL" /> -->
       </geometry>
       <!-- <geometry>
         <box size="0.16 0.152 0.152" />
@@ -274,7 +274,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/FL_hip.dae" />
+          filename="meshes/FL_hip.dae" />
       </geometry>
       <material
         name="">
@@ -355,7 +355,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/FL_thigh.dae" />
+          filename="meshes/FL_thigh.dae" />
       </geometry>
       <material
         name="">
@@ -434,7 +434,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/FL_calf.dae" />
+          filename="meshes/FL_calf.dae" />
       </geometry>
       <material
         name="">
@@ -568,7 +568,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/FR_hip.dae" />
+          filename="meshes/FR_hip.dae" />
       </geometry>
       <material
         name="">
@@ -649,7 +649,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/FR_thigh.dae" />
+          filename="meshes/FR_thigh.dae" />
       </geometry>
       <material
         name="">
@@ -728,7 +728,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/FR_calf.dae" />
+          filename="meshes/FR_calf.dae" />
       </geometry>
       <material
         name="">
@@ -863,7 +863,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/RL_hip.dae" />
+          filename="meshes/RL_hip.dae" />
       </geometry>
       <material
         name="">
@@ -944,7 +944,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/RL_thigh.dae" />
+          filename="meshes/RL_thigh.dae" />
       </geometry>
       <material
         name="">
@@ -1023,7 +1023,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/RL_calf.dae" />
+          filename="meshes/RL_calf.dae" />
       </geometry>
       <material
         name="">
@@ -1157,7 +1157,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/RR_hip.dae" />
+          filename="meshes/RR_hip.dae" />
       </geometry>
       <material
         name="">
@@ -1238,7 +1238,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/RR_thigh.dae" />
+          filename="meshes/RR_thigh.dae" />
       </geometry>
       <material
         name="">
@@ -1317,7 +1317,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/RR_calf.dae" />
+          filename="meshes/RR_calf.dae" />
       </geometry>
       <material
         name="">
@@ -1451,7 +1451,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/f_oc_link.STL" />
+          filename="meshes/f_oc_link.STL" />
       </geometry>
       <material
         name="">
@@ -1465,7 +1465,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/f_oc_link.STL" />
+          filename="meshes/f_oc_link.STL" />
       </geometry>
     </collision> -->
   </link>
@@ -1504,7 +1504,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/r_oc_link.STL" />
+          filename="meshes/r_oc_link.STL" />
       </geometry>
       <material
         name="">
@@ -1518,7 +1518,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="./meshes/r_oc_link.STL" />
+          filename="meshes/r_oc_link.STL" />
       </geometry>
     </collision> -->
   </link>
@@ -1547,7 +1547,7 @@
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="./meshes/z1_Link00.dae" scale="1 1 1"/>
+                <mesh filename="meshes/z1_Link00.dae" scale="1 1 1"/>
             </geometry>
         </visual>
         <!-- <collision>
@@ -1579,7 +1579,7 @@
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="./meshes/z1_Link01.dae" scale="1 1 1"/>
+                <mesh filename="meshes/z1_Link01.dae" scale="1 1 1"/>
             </geometry>
         </visual>
         <!-- <collision>
@@ -1611,7 +1611,7 @@
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="./meshes/z1_Link02.dae" scale="1 1 1"/>
+                <mesh filename="meshes/z1_Link02.dae" scale="1 1 1"/>
             </geometry>
         </visual>
         <collision>
@@ -1655,7 +1655,7 @@
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="./meshes/z1_Link03.dae" scale="1 1 1"/>
+                <mesh filename="meshes/z1_Link03.dae" scale="1 1 1"/>
             </geometry>
         </visual>
         <collision>
@@ -1693,7 +1693,7 @@
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="./meshes/z1_Link04.dae" scale="1 1 1"/>
+                <mesh filename="meshes/z1_Link04.dae" scale="1 1 1"/>
             </geometry>
         </visual>
         <!-- <collision>
@@ -1725,13 +1725,13 @@
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="./meshes/z1_Link05.dae" scale="1 1 1"/>
+                <mesh filename="meshes/z1_Link05.dae" scale="1 1 1"/>
             </geometry>
         </visual>
         <!-- <collision>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="./meshes/z1_Link05.dae" scale="1 1 1"/>
+                <mesh filename="meshes/z1_Link05.dae" scale="1 1 1"/>
             </geometry>
         </collision> -->
         <inertial>
@@ -1757,7 +1757,7 @@
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="./meshes/z1_Link06.dae" scale="1 1 1"/>
+                <mesh filename="meshes/z1_Link06.dae" scale="1 1 1"/>
             </geometry>
         </visual>
         <collision>
@@ -1786,7 +1786,7 @@
             <visual>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
-                    <mesh filename="./meshes/z1_GripperStator.dae" scale="1 1 1"/>
+                    <mesh filename="meshes/z1_GripperStator.dae" scale="1 1 1"/>
                 </geometry>
             </visual>
             <!-- <collision>
@@ -1798,7 +1798,7 @@
             <!-- <collision>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
-                    <mesh filename="./meshes/z1_GripperStator.dae" scale="1 1 1"/>
+                    <mesh filename="meshes/z1_GripperStator.dae" scale="1 1 1"/>
                 </geometry>
             </collision> -->
 
@@ -1825,13 +1825,13 @@
             <visual>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
-                    <mesh filename="./meshes/z1_GripperMover.dae" scale="1 1 1"/>
+                    <mesh filename="meshes/z1_GripperMover.dae" scale="1 1 1"/>
                 </geometry>
             </visual>
             <!-- <collision>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
-                    <mesh filename="./meshes/z1_GripperMover.dae" scale="1 1 1"/>
+                    <mesh filename="meshes/z1_GripperMover.dae" scale="1 1 1"/>
                 </geometry>
             </collision> -->
             <inertial>
